@@ -74,6 +74,23 @@ You can reopen `project.json` with the same behaviors for new videos. You can al
 - **Edit → Export settings** sets quality: CRF 18 (the default) looks visually lossless, and CRF 0 is lossless.
 - If you change an event's start or end after export, it's marked un-exported so you can re-export it.
 
+## Linux troubleshooting
+
+**"Could not load the Qt platform plugin 'xcb' … cv2/qt/plugins"**: the full `opencv-python` package ships its own copy of Qt, which clashes with PySide6. The app now works around this at startup, but the cleanest fix is to use the headless OpenCV build:
+
+```bash
+pip uninstall -y opencv-python
+pip install opencv-python-headless
+```
+
+**"xcb-cursor0 or libxcb-cursor0 is needed"**: Qt 6 needs `libxcb-cursor.so.0`, and many servers don't have it installed. You don't need admin rights to fix this. Install the library with conda:
+
+```bash
+conda create -y -p ~/xcb-cursor -c conda-forge xcb-util-cursor
+```
+
+Then run `python run_app.py` again. At startup the app looks for the library in `~/xcb-cursor/lib`, `<app folder>/lib/`, `~/.local/lib`, your conda folders, or `$VIDCLIP_XCB_CURSOR_DIR`, and loads it from there, so you don't have to set `LD_LIBRARY_PATH`. If you have admin rights, you can install it system-wide instead: `sudo dnf install xcb-util-cursor` (Fedora/RHEL/Rocky) or `sudo apt install libxcb-cursor0` (Debian/Ubuntu). To see which copy the app found, run `VIDCLIP_DEBUG=1 python run_app.py`.
+
 ## Notes / limitations
 
 - Very high-resolution video at 8× plays as fast as your machine can decode, skipping displayed frames. Frame-by-frame stepping is always exact.
