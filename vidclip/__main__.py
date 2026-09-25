@@ -11,6 +11,13 @@ for _var in ("QT_QPA_PLATFORM_PLUGIN_PATH", "QT_PLUGIN_PATH"):
     if "cv2" in os.environ.get(_var, ""):
         os.environ.pop(_var)
 
+# Qt >= 6.5 needs libxcb-cursor on Linux; find/pre-load a user-installed copy
+# if the system doesn't have one (see linux_qt_fix.py).
+from .linux_qt_fix import ensure_xcb_cursor  # noqa: E402
+
+if not ensure_xcb_cursor(verbose=bool(os.environ.get("VIDCLIP_DEBUG"))):
+    sys.exit(1)
+
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
 from .main_window import MainWindow  # noqa: E402
